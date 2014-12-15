@@ -47,7 +47,10 @@ class Adaptor(threading.Thread):
         if ts is None:
             ts = time.time()
 
-        final_ns = ('%s.%s' % (self.base_ns, ns)).lower()
+        if ns is None :
+            final_ns = self.base_ns.lower()
+        else :
+            final_ns = ('%s.%s' % (self.base_ns, ns)).lower()
 
         msg = {
             'type': 'thing_update',
