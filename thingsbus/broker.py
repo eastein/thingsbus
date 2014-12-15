@@ -12,21 +12,10 @@ DIRECTORY_INTERVAL = 15
 DIRECTORY_EXPIRE = 60
 BLOCK_TIME = 0.05
 
+from thing import Directory, Thing
 
-class Thing(object):
 
-    """
-    namespace is a dot delimited java-package type of thing. The name of the Thing itself should appear last.
-    """
-
-    def __init__(self, namespace):
-        self.namespace = namespace
-        self.last_data = None
-        self.last_data_ts = None
-
-    def set_data(self, data, ts):
-        self.last_data = data
-        self.last_data_ts = ts
+class BrokerThing(Thing):
 
     def emit_snapshot(self):
         return {
@@ -45,18 +34,6 @@ class Thing(object):
             return False
 
 
-class Directory(object):
-
-    def __init__(self):
-        self.name_to_thing = dict()
-
-    def get_thing(self, ns):
-        if ns not in self.name_to_thing:
-            self.name_to_thing[ns] = Thing(ns)
-
-        return self.name_to_thing[ns]
-
-
 class Broker(object):
 
     def __init__(self):
@@ -66,7 +43,7 @@ class Broker(object):
         self.ok = False
 
     def run(self):
-        self.directory = Directory()
+        self.directory = Directory(thing_class=BrokerThing)
         self.directory_out = zmqsub.BindPub('tcp://*:%d' % DIRECTORY_PORT)
         self.adaptors_in = zmqsub.BindSub('tcp://*:%d' % INPUT_PORT)
         self.sent_directory = time.time() - DIRECTORY_INTERVAL
