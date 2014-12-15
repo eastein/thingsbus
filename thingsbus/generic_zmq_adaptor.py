@@ -48,15 +48,21 @@ if __name__ == '__main__':
                 try:
                     msg = source.recv(timeout=0.01)
 
-                    k, v = opts.filter.split(':', 1)
+                    if opts.filter is not None :
+                        k, v = opts.filter.split(':', 1)
 
-                    if k not in msg:
-                        continue
-                    if msg[k] != v:
-                        continue
+                        if k not in msg:
+                            continue
+                        if msg[k] != v:
+                            continue
 
-                    ns = msg[opts.nskey]
-                    ts = msg[opts.tskey]
+                    ns = None
+                    if opts.nskey is not None :
+                        ns = msg[opts.nskey]
+                    ts = None
+                    if opts.tskey is not None :
+                        ts = msg[opts.tskey]
+
                     data = dict()
                     for p in opts.projections.split(','):
                         data[p] = msg[p]
