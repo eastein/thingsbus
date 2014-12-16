@@ -48,10 +48,11 @@ This sets up an adaptor that lets you send data under the `shop.shopbot` namespa
 <A name="toc2-47" title="Connect to the broker and get data for a Thing" />
 ## Connect to the broker and get data for a Thing
 
-	import thingsbus.client as client
-	cl = client.Client(broker_url='tcp://*:7954')
-	cl.start()
-	sc = cl.directory.get_thing('shop.shopbot.spacemon')
-	sc.get_data()
+    >>> import thingsbus.client
+    >>> cl = thingsbus.client.Client(zone='pumpingstationone.org')
+    >>> cl.start()
+    >>> elec = cl.directory.get_thing('spacemon.electronics')
+    >>> elec.get_data()
+    (1.2385549545288086, {u'ratio_busy': 0.03262867647058824, u'luminance': 106.09383138020833})
 
 The lats call to `get_data` will return a tuple of float seconds (age of the data) and the data for the directory - if there is any data. If not, None will be returned.

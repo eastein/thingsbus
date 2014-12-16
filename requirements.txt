@@ -1,2 +1,2 @@
 dnspython
-git+https://github.com/eastein/zmqfan.git@develop-0.6#egg=zmqfan
+zmqfan>=0.6
