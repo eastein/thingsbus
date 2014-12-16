@@ -25,33 +25,7 @@ Both `thingsbus.adaptor.Adaptor` and `thingsbus.client.Client` take the keyword 
 <A name="toc1-24" title="Examples" />
 # Examples
 
-<A name="toc2-27" title="Adapt lidless at PS1 to a broker" />
-## Adapt lidless at PS1 to a broker
-
-    python -m thingsbus.generic_zmq_adaptor --ns spacemon --nskey camname --tskey frame_time --filter mtype:percept_update --projections luminance,ratio_busy --url 'tcp://*:7955' -s tcp://bellamy.ps1:7202,tcp://bellamy.ps1:7200,tcp://bellamy.ps1:7201,tcp://bellamy.ps1:7206
-
-
-Easy, right?
-
-<A name="toc2-35" title="Run the broker" />
-## Run the broker
-
-    python -m thingsbus.broker
-
-
-<A name="toc2-41" title="Use the adaptor module" />
-## Use the adaptor module
-
-    import thingsbus.adaptor
-    adapt = thingsbus.adaptor.Adaptor('shop.shopbot', broker_input_url='tcp://*:7955')
-    adapt.start()
-    adapt.send({'busy': 12.0, 'light': 31.8}, ns='spacemon')
-
-This sets up an adaptor that lets you send data under the `shop.shopbot` namespace, and then demonstrates sending data for the Thing `shop.shopbot.spacemon` that includes a busy percentage and a light percentage. If ts was supplied (float epoch) to the call to `send`, it would be passed through.
-
-
-
-<A name="toc2-53" title="Connect to the broker and get data for a Thing" />
+<A name="toc2-27" title="Connect to the broker and get data for a Thing" />
 ## Connect to the broker and get data for a Thing
 
     >>> import thingsbus.client
@@ -61,4 +35,29 @@ This sets up an adaptor that lets you send data under the `shop.shopbot` namespa
     >>> elec.get_data()
     (1.2385549545288086, {u'ratio_busy': 0.03262867647058824, u'luminance': 106.09383138020833})
 
-The lats call to `get_data` will return a tuple of float seconds (age of the data) and the data for the directory - if there is any data. If not, None will be returned.
+The last call to `get_data` will return a tuple of float seconds (age of the data) and the data for the directory - if there is any data. If not, None will be returned.
+
+
+<A name="toc2-40" title="Run the broker" />
+## Run the broker
+
+    python -m thingsbus.broker
+
+
+<A name="toc2-46" title="Use the adaptor module" />
+## Use the adaptor module
+
+    import thingsbus.adaptor
+    adapt = thingsbus.adaptor.Adaptor('shop.shopbot', broker_input_url='tcp://*:7955')
+    adapt.start()
+    adapt.send({'busy': 12.0, 'light': 31.8}, ns='spacemon')
+
+This sets up an adaptor that lets you send data under the `shop.shopbot` namespace, and then demonstrates sending data for the Thing `shop.shopbot.spacemon` that includes a busy percentage and a light percentage. If ts was supplied (float epoch) to the call to `send`, it would be passed through.
+
+<A name="toc2-56" title="Adapt lidless at PS1 to a broker" />
+## Adapt lidless at PS1 to a broker
+
+    python -m thingsbus.generic_zmq_adaptor --ns spacemon --nskey camname --tskey frame_time --filter mtype:percept_update --projections luminance,ratio_busy --url 'tcp://*:7955' -s tcp://bellamy.ps1:7202,tcp://bellamy.ps1:7200,tcp://bellamy.ps1:7201,tcp://bellamy.ps1:7206
+
+
+Easy, right?

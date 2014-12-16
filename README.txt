@@ -20,12 +20,17 @@ Both `thingsbus.adaptor.Adaptor` and `thingsbus.client.Client` take the keyword 
 
 # Examples
 
-## Adapt lidless at PS1 to a broker
+## Connect to the broker and get data for a Thing
 
-    python -m thingsbus.generic_zmq_adaptor --ns spacemon --nskey camname --tskey frame_time --filter mtype:percept_update --projections luminance,ratio_busy --url 'tcp://*:7955' -s tcp://bellamy.ps1:7202,tcp://bellamy.ps1:7200,tcp://bellamy.ps1:7201,tcp://bellamy.ps1:7206
+    >>> import thingsbus.client
+    >>> cl = thingsbus.client.Client(zone='pumpingstationone.org')
+    >>> cl.start()
+    >>> elec = cl.directory.get_thing('spacemon.electronics')
+    >>> elec.get_data()
+    (1.2385549545288086, {u'ratio_busy': 0.03262867647058824, u'luminance': 106.09383138020833})
 
+The last call to `get_data` will return a tuple of float seconds (age of the data) and the data for the directory - if there is any data. If not, None will be returned.
 
-Easy, right?
 
 ## Run the broker
 
@@ -41,15 +46,9 @@ Easy, right?
 
 This sets up an adaptor that lets you send data under the `shop.shopbot` namespace, and then demonstrates sending data for the Thing `shop.shopbot.spacemon` that includes a busy percentage and a light percentage. If ts was supplied (float epoch) to the call to `send`, it would be passed through.
 
+## Adapt lidless at PS1 to a broker
+
+    python -m thingsbus.generic_zmq_adaptor --ns spacemon --nskey camname --tskey frame_time --filter mtype:percept_update --projections luminance,ratio_busy --url 'tcp://*:7955' -s tcp://bellamy.ps1:7202,tcp://bellamy.ps1:7200,tcp://bellamy.ps1:7201,tcp://bellamy.ps1:7206
 
 
-## Connect to the broker and get data for a Thing
-
-    >>> import thingsbus.client
-    >>> cl = thingsbus.client.Client(zone='pumpingstationone.org')
-    >>> cl.start()
-    >>> elec = cl.directory.get_thing('spacemon.electronics')
-    >>> elec.get_data()
-    (1.2385549545288086, {u'ratio_busy': 0.03262867647058824, u'luminance': 106.09383138020833})
-
-The lats call to `get_data` will return a tuple of float seconds (age of the data) and the data for the directory - if there is any data. If not, None will be returned.
+Easy, right?
