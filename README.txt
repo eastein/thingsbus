@@ -8,7 +8,7 @@
 
 Based on ZeroMQ, Things Bus has 3 main parts:
 
-* Pollers/Adaptors - bridges that are aware of both the thing they are tapping into, and Things Bus, so that the individual data sources don't have to be Things Bus aware
+* Pollers/Adaptors - bridges that are aware of both the thing they are tapping into, and Things Bus, so that the individual data sources don't have to be Things Bus aware. The `thingsbus.adaptor` python module supplies an `Adaptor` class which can be used to implement an Adaptor, either as a separate system from the data source, or within it.
 * Broker/Directory - Server system that looks at the information gathered by the pollers/adaptos, provides a point from which to receive it using one protocol, and generates a directory of the Things
 * Consumers/Clients - Programs that are aware of Things Bus and may use helper libraries supplied by Things Bus, but aren't aware of the implementation details of the Things.
 
