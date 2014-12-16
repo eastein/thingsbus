@@ -12,7 +12,11 @@ Based on ZeroMQ, Things Bus has 3 main parts:
 * Broker/Directory - Server system that looks at the information gathered by the pollers/adaptos, provides a point from which to receive it using one protocol, and generates a directory of the Things
 * Consumers/Clients - Programs that are aware of Things Bus and may use helper libraries supplied by Things Bus, but aren't aware of the implementation details of the Things.
 
+## Implemtation Details
 
+### Service Discovery
+
+Both `thingsbus.adaptor.Adaptor` and `thingsbus.client.Client` take the keyword argument `zone`; the SRV record `_thingsbus._tcp` is used to determine the main port & the hostname of the broker server. If this is not desired, then the `broker_url` parameter of `Client` and the `broker_input_url` of `Adaptor` are available for use. It's advised to use an SRV record, for simplicity and for reducing the need for passing additional configuration around to all of the things at the edges of your Thingsbus setup.
 
 # Examples
 

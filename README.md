@@ -14,12 +14,18 @@ Based on ZeroMQ, Things Bus has 3 main parts:
 * Broker/Directory - Server system that looks at the information gathered by the pollers/adaptos, provides a point from which to receive it using one protocol, and generates a directory of the Things
 * Consumers/Clients - Programs that are aware of Things Bus and may use helper libraries supplied by Things Bus, but aren't aware of the implementation details of the Things.
 
+<A name="toc2-16" title="Implemtation Details" />
+## Implemtation Details
 
+<A name="toc3-19" title="Service Discovery" />
+### Service Discovery
 
-<A name="toc1-18" title="Examples" />
+Both `thingsbus.adaptor.Adaptor` and `thingsbus.client.Client` take the keyword argument `zone`; the SRV record `_thingsbus._tcp` is used to determine the main port & the hostname of the broker server. If this is not desired, then the `broker_url` parameter of `Client` and the `broker_input_url` of `Adaptor` are available for use. It's advised to use an SRV record, for simplicity and for reducing the need for passing additional configuration around to all of the things at the edges of your Thingsbus setup.
+
+<A name="toc1-24" title="Examples" />
 # Examples
 
-<A name="toc2-21" title="Adapt lidless at PS1 to a broker" />
+<A name="toc2-27" title="Adapt lidless at PS1 to a broker" />
 ## Adapt lidless at PS1 to a broker
 
     python -m thingsbus.generic_zmq_adaptor --ns spacemon --nskey camname --tskey frame_time --filter mtype:percept_update --projections luminance,ratio_busy --url 'tcp://*:7955' -s tcp://bellamy.ps1:7202,tcp://bellamy.ps1:7200,tcp://bellamy.ps1:7201,tcp://bellamy.ps1:7206
@@ -27,13 +33,13 @@ Based on ZeroMQ, Things Bus has 3 main parts:
 
 Easy, right?
 
-<A name="toc2-29" title="Run the broker" />
+<A name="toc2-35" title="Run the broker" />
 ## Run the broker
 
     python -m thingsbus.broker
 
 
-<A name="toc2-35" title="Use the adaptor module" />
+<A name="toc2-41" title="Use the adaptor module" />
 ## Use the adaptor module
 
     import thingsbus.adaptor
@@ -45,7 +51,7 @@ This sets up an adaptor that lets you send data under the `shop.shopbot` namespa
 
 
 
-<A name="toc2-47" title="Connect to the broker and get data for a Thing" />
+<A name="toc2-53" title="Connect to the broker and get data for a Thing" />
 ## Connect to the broker and get data for a Thing
 
     >>> import thingsbus.client
