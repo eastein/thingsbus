@@ -12,7 +12,7 @@ Based on ZeroMQ, Things Bus has 3 main parts:
 * Broker/Directory - Server system that looks at the information gathered by the pollers/adaptos, provides a point from which to receive it using one protocol, and generates a directory of the Things
 * Consumers/Clients - Programs that are aware of Things Bus and may use helper libraries supplied by Things Bus, but aren't aware of the implementation details of the Things.
 
-## Implemtation Details
+## Implementation Details
 
 ### Service Discovery
 
