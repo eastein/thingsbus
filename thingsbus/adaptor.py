@@ -7,18 +7,18 @@ import time
 
 class Adaptor(threading.Thread):
 
-    def __init__(self, base_ns, broker_input_url=None, zone=None):
+    def __init__(self, ns, broker_input_url=None, zone=None):
         threading.Thread.__init__(self)
 
         if (zone is None) and (broker_input_url is None):
             raise RuntimeError('Must supply zone or broker_input_url')
-        if not base_ns:
-            raise RuntimeError('Base ns must exist.')
+        if not ns:
+            raise RuntimeError('ns must be set.')
 
         self.zone = zone
         self._broker_input_url = broker_input_url
 
-        self.base_ns = base_ns
+        self.ns = ns
         self.ok = True
         self.msg_q = Queue.Queue()
 
@@ -31,6 +31,15 @@ class Adaptor(threading.Thread):
             return self._broker_input_url
         else:
             return sd.ServiceFinder.broker_input_url(self.zone)
+
+    def __repr__(self):
+        s = 'Adaptor<ns=%s' % self.ns
+        if self._broker_input_url is not None:
+            s += (', broker_input_url=' + self._broker_input_url)
+        if self.zone is not None:
+            s += (', zone=' + self.zone)
+        s += '>'
+        return s
 
     def run(self):
         url = self.broker_input_url
@@ -47,10 +56,10 @@ class Adaptor(threading.Thread):
         if ts is None:
             ts = time.time()
 
-        if ns is None :
-            final_ns = self.base_ns.lower()
-        else :
-            final_ns = ('%s.%s' % (self.base_ns, ns)).lower()
+        if ns is None:
+            final_ns = self.ns.lower()
+        else:
+            final_ns = ('%s.%s' % (self.ns, ns)).lower()
 
         msg = {
             'type': 'thing_update',

@@ -1,3 +1,4 @@
+from thingsbus import thing
 from zmqfan import zmqsub
 import time
 
@@ -12,17 +13,16 @@ DIRECTORY_INTERVAL = 15
 DIRECTORY_EXPIRE = 60
 BLOCK_TIME = 0.05
 
-from thing import Directory, Thing
 
-
-class BrokerThing(Thing):
+class BrokerThing(thing.Thing):
 
     def emit_snapshot(self):
-        return {
-            'data': self.last_data,
-            'ts': self.last_data_ts,
-            'ns': self.namespace,
-        }
+        with self.data_lock:
+            return {
+                'data': self.last_data,
+                'ts': self.last_data_ts,
+                'ns': self.ns,
+            }
 
     @property
     def expired(self):
@@ -37,40 +37,25 @@ class BrokerThing(Thing):
 class Broker(object):
 
     def __init__(self):
+        self.directory = thing.Directory(thing_class=BrokerThing)
         self.ok = True
 
     def stop(self):
         self.ok = False
 
     def run(self):
-        self.directory = Directory(thing_class=BrokerThing)
         self.directory_out = zmqsub.BindPub('tcp://*:%d' % DIRECTORY_PORT)
         self.adaptors_in = zmqsub.BindSub('tcp://*:%d' % INPUT_PORT)
         self.sent_directory = time.time() - DIRECTORY_INTERVAL
         while self.ok:
             try:
                 msg = self.adaptors_in.recv(timeout=BLOCK_TIME)
-                # TODO checking keys, there are likely some remotely exploitable easy crashes right here
 
-                if msg['type'] == 'thing_update':
-                    try:
-                        ns = msg['ns']
-                        data = msg['data']
-                        ts = msg.get('ts', time.time())
-                    except KeyError:
-                        # well this is screwed! Let's give up.
-                        continue
-
-                    thing = self.directory.get_thing(ns)
-                    thing.set_data(data, ts)
-
-                    self.directory_out.send({
-                        'type': 'thing_update',
-                        'ns': ns,
-                        'data': data,
-                        'ts': ts
-                    })
-
+                output_event = self.directory.handle_message(msg)
+                if output_event:
+                    self.directory_out.send(output_event)
+            except thing.BadMessageException:
+                pass  # we just ignore these - TODO add a debug mode that shows them somehow
             except zmqsub.NoMessagesException:
                 pass  # it's ok to not receive anything (for christmas, or on sockets)
 
@@ -82,19 +67,19 @@ class Broker(object):
                     'type': 'thing_snapshot',
                     'ts': now,
                     'data': dict([
-                        (ns, thing.emit_snapshot())
+                        (ns, thing_obj.emit_snapshot())
                         for
-                        (ns, thing)
+                        (ns, thing_obj)
                         in
                         self.directory.name_to_thing.items()
-                        if not thing.expired
+                        if not thing_obj.expired
                     ])
                 })
                 self.sent_directory = now
 
 if __name__ == '__main__':
-    broker = Broker()
+    broker_obj = Broker()
     try:
-        broker.run()
+        broker_obj.run()
     except KeyboardInterrupt:
-        broker.stop()
+        broker_obj.stop()

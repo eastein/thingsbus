@@ -38,3 +38,13 @@ Easy, right?
 This sets up an adaptor that lets you send data under the `shop.shopbot` namespace, and then demonstrates sending data for the Thing `shop.shopbot.spacemon` that includes a busy percentage and a light percentage. If ts was supplied (float epoch) to the call to `send`, it would be passed through.
 
 
+
+## Connect to the broker and get data for a Thing
+
+	import thingsbus.client as client
+	cl = client.Client(broker_url='tcp://*:7954')
+	cl.start()
+	sc = cl.directory.get_thing('shop.shopbot.spacemon')
+	sc.get_data()
+
+The lats call to `get_data` will return a tuple of float seconds (age of the data) and the data for the directory - if there is any data. If not, None will be returned.
