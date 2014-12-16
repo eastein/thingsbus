@@ -8,7 +8,6 @@ import time
 class Adaptor(threading.Thread):
 
     def __init__(self, ns, broker_input_url=None, zone=None):
-        threading.Thread.__init__(self)
 
         if (zone is None) and (broker_input_url is None):
             raise RuntimeError('Must supply zone or broker_input_url')
@@ -21,6 +20,10 @@ class Adaptor(threading.Thread):
         self.ns = ns
         self.ok = True
         self.msg_q = Queue.Queue()
+        
+        threading.Thread.__init__(self)
+        self.daemon = True
+        self.start()
 
     def stop(self):
         self.ok = False

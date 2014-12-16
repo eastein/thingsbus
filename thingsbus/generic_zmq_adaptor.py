@@ -40,7 +40,6 @@ if __name__ == '__main__':
 
     adaptor = thingsbus.adaptor.Adaptor(
         opts.ns, broker_input_url=opts.thingsbus_broker_input_url, zone=opts.thingsbus_zone)
-    adaptor.start()
 
     try:
         while True:

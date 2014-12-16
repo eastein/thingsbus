@@ -27,6 +27,8 @@ class Client(threading.Thread):
         self._broker_url = broker_url
         self.directory = Directory()
         threading.Thread.__init__(self)
+        self.daemon = True
+        self.start()
 
     @property
     def broker_url(self):
