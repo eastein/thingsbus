@@ -15,6 +15,16 @@ class BadMessageException(Exception):
 class Thing(object):
 
     """
+    HAS_EVENT_HOOK on a Thing class or a descendant of Thing indicates that _event_hook is defined and should be called
+                   when a data update arrives for the Thing with these params:
+                   @param self - obvious
+                   @param is_new - boolean, whether the data is new, - false for snapshots 
+                   @param ts - float, unix epoch of the data's timestamp
+                   @param data - the data
+    """
+    HAS_EVENT_HOOK = False
+
+    """
     ns is a dot delimited namespace. The name of the Thing itself should appear last.
     """
 
@@ -58,7 +68,7 @@ class Directory(object):
 
         return self.name_to_thing[ns]
 
-    def handle_data_set(self, msg):
+    def handle_data_set(self, msg, from_snapshot=False):
         for k in ['ns', 'data']:
             if k not in msg:
                 raise BadMessageException("%s not in message." % k)
@@ -72,6 +82,8 @@ class Directory(object):
         # evidently we'll overwrite our own module if we use the same identifier. Fun! Do not do that.
         _thing = self.get_thing(ns)
         _thing.set_data(data, ts)
+        if self.thing_class.HAS_EVENT_HOOK:
+            _thing._event_hook(not from_snapshot, ts, data)
 
         return {
             'type': 'thing_update',
@@ -97,6 +109,6 @@ class Directory(object):
                     raise BadMessageException("Snapshot data must be a dictionary.")
 
                 for data_value in msg['data'].values():
-                    self.handle_data_set(data_value)
+                    self.handle_data_set(data_value, from_snapshot=True)
         else:
             raise BadmessageException("Don't know how to handle message of type %s" % msg['type'])
