@@ -2,6 +2,7 @@ import time
 import threading
 import copy
 import pprint
+import re
 
 
 class InternalException(Exception):
@@ -10,6 +11,32 @@ class InternalException(Exception):
 
 class BadMessageException(Exception):
     pass
+
+
+class BadNamespaceException(Exception):
+    pass
+
+
+NS_PART_REGEXSTR = '([a-z]{1}[a-z0-9\-\_]{0,63})'
+NS_PART_REGEX = re.compile('^%s$' % NS_PART_REGEXSTR)
+
+
+def parse_ns(ns):
+    ns_parts = []
+    if ns != '':
+        for ns_part in ns.split('.'):
+            nsp_m = NS_PART_REGEX.match(ns_part)
+            if nsp_m is None:
+                raise BadNamespaceException()
+            ns_parts.append(nsp_m.groups(0)[0])
+    return ns_parts
+
+
+def stringify_ns(nsl):
+    for ns_part in nsl:
+        if not NS_PART_REGEX.match(ns_part):
+            raise BadNamespaceException
+    return '.'.join(nsl)
 
 
 class Thing(object):
