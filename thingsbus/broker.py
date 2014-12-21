@@ -67,11 +67,11 @@ class Broker(object):
                     'type': 'thing_snapshot',
                     'ts': now,
                     'data': dict([
-                        (ns, thing_obj.emit_snapshot())
+                        (thing_obj.ns, thing_obj.emit_snapshot())
                         for
-                        (ns, thing_obj)
+                        thing_obj
                         in
-                        self.directory.name_to_thing.items()
+                        self.directory.all_things
                         if not thing_obj.expired
                     ])
                 })

@@ -55,11 +55,29 @@ class Thing(object):
     ns is a dot delimited namespace. The name of the Thing itself should appear last.
     """
 
-    def __init__(self, ns):
+    def __init__(self, directory, ns):
+        self.directory = directory
         self.ns = ns
+        self.ns_parts = parse_ns(self.ns)
+        self.children = list()
+
+        if self.ns:
+            # all but the root have a parent, and should register themselves with their parent
+            self.parent = self.directory.get_thing(stringify_ns(self.ns_parts[0:-1]))
+            self.parent._register_child(self)
+        else:
+            # the root has no parent.
+            self.parent = None
+
         self.data_lock = threading.Lock()
         self.last_data = None
         self.last_data_ts = None
+
+    def _register_child(self, child):
+        """
+        This call is for internal use; it tells a Thing that it has a child Thing.
+        """
+        self.children.append(child)
 
     def set_data(self, data, ts):
         with self.data_lock:
@@ -75,7 +93,10 @@ class Thing(object):
             return (now - self.last_data_ts), copy.deepcopy(self.last_data)
 
     def __repr__(self):
-        return 'Thing<%s>' % self.ns
+        if self.ns:
+            return 'Thing<%s>' % self.ns
+        else:
+            return 'RootThing'
 
     def __str__(self):
         return repr(self)
@@ -84,16 +105,21 @@ class Thing(object):
 class Directory(object):
 
     def __init__(self, thing_class=None):
-        self.name_to_thing = dict()
+        self._name_to_thing = dict()
         if thing_class is None:
             thing_class = thing.Thing
         self.thing_class = thing_class
+        self.root = self.get_thing('')
 
     def get_thing(self, ns):
-        if ns not in self.name_to_thing:
-            self.name_to_thing[ns] = self.thing_class(ns)
+        if ns not in self._name_to_thing:
+            self._name_to_thing[ns] = self.thing_class(self, ns)
 
-        return self.name_to_thing[ns]
+        return self._name_to_thing[ns]
+
+    @property
+    def all_things(self):
+        return self._name_to_thing.values()
 
     def handle_data_set(self, msg, from_snapshot=False):
         for k in ['ns', 'data']:
@@ -127,7 +153,10 @@ class Directory(object):
             raise BadMessageException("Messages must be typed.")
 
         if msg['type'] == 'thing_update':
-            return self.handle_data_set(msg)
+            try:
+                return self.handle_data_set(msg)
+            except BadNamespaceException:
+                pass  # TODO handle debug printing this
         elif msg['type'] == 'thing_snapshot':
             if accept_snapshots:
                 if 'data' not in msg:
@@ -136,6 +165,9 @@ class Directory(object):
                     raise BadMessageException("Snapshot data must be a dictionary.")
 
                 for data_value in msg['data'].values():
-                    self.handle_data_set(data_value, from_snapshot=True)
+                    try:
+                        self.handle_data_set(data_value, from_snapshot=True)
+                    except BadNamespaceException:
+                        pass  # TODO handle debug printing this
         else:
             raise BadmessageException("Don't know how to handle message of type %s" % msg['type'])

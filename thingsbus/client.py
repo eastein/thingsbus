@@ -5,14 +5,19 @@ from thingsbus import service_discovery, thing
 
 F_NONE = 0
 F_SNAPSHOT = 1
-
+F_TREE = 2
 FLAG_REPR = [
     (F_SNAPSHOT, 'F_SNAPSHOT'),
+    (F_TREE, 'F_TREE'),
 ]
 
 
 def repr_flag(flags):
     return '|'.join([fr[1] for fr in FLAG_REPR if (fr[0] & flags) != 0])
+
+
+def chk_flag(flags, flag):
+    return (flags & flag) != 0
 
 
 class ThingEvent(object):
@@ -28,7 +33,7 @@ class ThingEvent(object):
 
     @property
     def is_snapshot(self):
-        return (self.flags & F_SNAPSHOT) != 0
+        return chk_flag(self.flags, F_SNAPSHOT)
 
 
 class Thing(thing.Thing):
@@ -38,16 +43,34 @@ class Thing(thing.Thing):
         thing.Thing.__init__(self, *a, **kw)
         self.event_listeners = list()
 
-    def subscribe(self, callable_function):
-        self.event_listeners.append(callable_function)
+    def subscribe(self, callable_function, flags=F_NONE):
+        self.event_listeners.append((callable_function, flags))
+
+    def _event_handle(self, event, tree_mode):
+        flags_check = []
+        if event.is_snapshot:
+            flags_check.append(F_SNAPSHOT)
+        if tree_mode:
+            flags_check.append(F_TREE)
+
+        for el, flags in self.event_listeners:
+            process = True
+            for flag_check in flags_check:
+                if not chk_flag(flags, flag_check):
+                    process = False
+                    break
+            if process:
+                el(event)
+
+        if self.parent is not None:
+            self.parent._event_handle(event, True)
 
     def _event_hook(self, is_new, ts, data):
         flags = F_NONE
         if not is_new:
             flags |= F_SNAPSHOT
         event = ThingEvent(self, ts, data, flags)
-        for el in self.event_listeners:
-            el(event)
+        self._event_handle(event, False)
 
 
 class Directory(thing.Directory):
