@@ -46,6 +46,9 @@ class Thing(thing.Thing):
     def subscribe(self, callable_function, flags=F_NONE):
         self.event_listeners.append((callable_function, flags))
 
+    def unsubscribe(self, callable_function):
+        self.event_listeners = [elt for elt in self.event_listeners if elt[0] != callable_function]
+
     def _event_handle(self, event, tree_mode):
         flags_check = []
         if event.is_snapshot:
