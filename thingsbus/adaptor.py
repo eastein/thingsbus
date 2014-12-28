@@ -3,6 +3,7 @@ from zmqfan import zmqsub
 import threading
 import Queue
 import time
+import thing
 
 
 class Adaptor(threading.Thread):
@@ -18,9 +19,10 @@ class Adaptor(threading.Thread):
         self._broker_input_url = broker_input_url
 
         self.ns = ns
+        self.ns_parts = thing.parse_ns(ns)
         self.ok = True
         self.msg_q = Queue.Queue()
-        
+
         threading.Thread.__init__(self)
         self.daemon = True
         self.start()
@@ -60,9 +62,9 @@ class Adaptor(threading.Thread):
             ts = time.time()
 
         if ns is None:
-            final_ns = self.ns.lower()
+            final_ns = self.ns
         else:
-            final_ns = ('%s.%s' % (self.ns, ns)).lower()
+            final_ns = thing.stringify_ns(self.ns_parts + thing.parse_ns(ns))
 
         msg = {
             'type': 'thing_update',
@@ -70,4 +72,5 @@ class Adaptor(threading.Thread):
             'data': data,
             'ts': ts
         }
+
         self.msg_q.put(msg)
