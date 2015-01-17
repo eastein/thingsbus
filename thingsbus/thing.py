@@ -111,9 +111,12 @@ class Directory(object):
         self.thing_class = thing_class
         self.root = self.get_thing('')
 
-    def get_thing(self, ns):
+    def get_thing(self, ns, create_on_missing=True):
         if ns not in self._name_to_thing:
-            self._name_to_thing[ns] = self.thing_class(self, ns)
+            if create_on_missing:
+                self._name_to_thing[ns] = self.thing_class(self, ns)
+            else:
+                return
 
         return self._name_to_thing[ns]
 
