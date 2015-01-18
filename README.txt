@@ -39,14 +39,14 @@ The last call to `get_data` will return a tuple of float seconds (age of the dat
 ## Use the adaptor module
 
     import thingsbus.adaptor
-    adapt = thingsbus.adaptor.Adaptor('shop.shopbot', broker_input_url='tcp://*:7955')
+    adapt = thingsbus.adaptor.Adaptor('shop.shopbot', 'http://example.com/Shopbot_Thingsbus_Documentation', broker_input_url='tcp://*:7955')
     adapt.send({'busy': 12.0, 'light': 31.8}, ns='spacemon')
 
 This sets up an adaptor that lets you send data under the `shop.shopbot` namespace, and then demonstrates sending data for the Thing `shop.shopbot.spacemon` that includes a busy percentage and a light percentage. If ts was supplied (float epoch) to the call to `send`, it would be passed through.
 
 ## Adapt lidless at PS1 to a broker
 
-    python -m thingsbus.generic_zmq_adaptor --ns spacemon --nskey camname --tskey frame_time --filter mtype:percept_update --projections luminance,ratio_busy --url 'tcp://*:7955' -s tcp://bellamy.ps1:7202,tcp://bellamy.ps1:7200,tcp://bellamy.ps1:7201,tcp://bellamy.ps1:7206
+    python -m thingsbus.generic_zmq_adaptor --ns spacemon --nskey camname --tskey frame_time --filter mtype:percept_update --projections luminance,ratio_busy --url 'tcp://*:7955' -s tcp://bellamy.ps1:7202,tcp://bellamy.ps1:7200,tcp://bellamy.ps1:7201,tcp://bellamy.ps1:7206 --documentation "https://wiki.pumpingstationone.org/Spacemon#Things_Bus"
 
 
 Easy, right?

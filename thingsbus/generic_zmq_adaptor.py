@@ -29,6 +29,7 @@ if __name__ == '__main__':
     parser.add_option('--projections', dest='projections', default=None,
                       help='Comma separated list of fields to include in the data dictionary into things bus.')
     parser.add_option('--ns', dest='ns', help='Namespace to put information into')
+    parser.add_option('-d', '--documentation', dest='documentation_url', help="Documentation URL.")
 
     (opts, args) = parser.parse_args()
 
@@ -39,7 +40,7 @@ if __name__ == '__main__':
         sources.append(source)
 
     adaptor = thingsbus.adaptor.Adaptor(
-        opts.ns, broker_input_url=opts.thingsbus_broker_input_url, zone=opts.thingsbus_zone)
+        opts.ns, opts.documentation_url, broker_input_url=opts.thingsbus_broker_input_url, zone=opts.thingsbus_zone)
 
     try:
         while True:
@@ -47,7 +48,7 @@ if __name__ == '__main__':
                 try:
                     msg = source.recv(timeout=0.01)
 
-                    if opts.filter is not None :
+                    if opts.filter is not None:
                         k, v = opts.filter.split(':', 1)
 
                         if k not in msg:
@@ -56,10 +57,10 @@ if __name__ == '__main__':
                             continue
 
                     ns = None
-                    if opts.nskey is not None :
+                    if opts.nskey is not None:
                         ns = msg[opts.nskey]
                     ts = None
-                    if opts.tskey is not None :
+                    if opts.tskey is not None:
                         ts = msg[opts.tskey]
 
                     data = dict()
