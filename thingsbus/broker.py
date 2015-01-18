@@ -1,3 +1,4 @@
+import optparse
 from thingsbus import thing
 from zmqfan import zmqsub
 import time
@@ -37,9 +38,10 @@ class BrokerThing(thing.Thing):
 
 class Broker(object):
 
-    def __init__(self):
+    def __init__(self, verbose=False):
         self.directory = thing.Directory(thing_class=BrokerThing)
         self.ok = True
+        self.verbose = verbose
 
     def stop(self):
         self.ok = False
@@ -56,7 +58,8 @@ class Broker(object):
                 if output_event:
                     self.directory_out.send(output_event)
             except thing.BadMessageException:
-                pass  # we just ignore these - TODO add a debug mode that shows them somehow
+                if self.verbose:
+                    print 'recvd bad zeromq message, skipped.'
             except zmqsub.NoMessagesException:
                 pass  # it's ok to not receive anything (for christmas, or on sockets)
 
@@ -64,7 +67,7 @@ class Broker(object):
             if now > self.sent_directory + DIRECTORY_INTERVAL:
                 # time to send out a snapshot, for fun!
                 # maybe we should send snapshots on another socket, later.
-                self.directory_out.send({
+                snapshot_msg = {
                     'type': 'thing_snapshot',
                     'ts': now,
                     'data': dict([
@@ -75,11 +78,19 @@ class Broker(object):
                         self.directory.all_things
                         if not thing_obj.expired
                     ])
-                })
+                }
+                self.directory_out.send(snapshot_msg)
+                if self.verbose:
+                    print 'sent snapshot of %d things.' % len(snapshot_msg['data'])
                 self.sent_directory = now
 
 if __name__ == '__main__':
-    broker_obj = Broker()
+    parser = optparse.OptionParser()
+    parser.add_option('-v', '--verbose', dest='verbose', action='store_true', default=False, help="Verbose mode.")
+
+    (opts, args) = parser.parse_args()
+
+    broker_obj = Broker(verbose=opts.verbose)
     try:
         broker_obj.run()
     except KeyboardInterrupt:
