@@ -72,6 +72,7 @@ class Thing(object):
         self.data_lock = threading.Lock()
         self.last_data = None
         self.last_data_ts = None
+        self.documentation_url = None
 
     def _register_child(self, child):
         """
@@ -79,9 +80,11 @@ class Thing(object):
         """
         self.children.append(child)
 
-    def set_data(self, data, ts):
+    def set_data(self, data, ts, documentation_url=None):
         with self.data_lock:
             self.last_data = data
+            if documentation_url:
+                self.documentation_url = documentation_url
             self.last_data_ts = ts
 
     def get_data(self):
@@ -132,12 +135,12 @@ class Directory(object):
         # TODO validate ns, ts - data really can be anything.
         ns = msg['ns']
         ts = msg.get('ts', time.time())
-
+        documentation_url = msg.get('documentation_url')
         data = msg['data']
 
         # evidently we'll overwrite our own module if we use the same identifier. Fun! Do not do that.
         _thing = self.get_thing(ns)
-        _thing.set_data(data, ts)
+        _thing.set_data(data, ts, documentation_url=documentation_url)
         if self.thing_class.HAS_EVENT_HOOK:
             _thing._event_hook(not from_snapshot, ts, data)
 
@@ -145,7 +148,8 @@ class Directory(object):
             'type': 'thing_update',
             'ns': ns,
             'data': data,
-            'ts': ts
+            'ts': ts,
+            'documentation_url': documentation_url
         }
 
     def handle_message(self, msg, accept_snapshots=False):

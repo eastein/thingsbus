@@ -22,6 +22,7 @@ class BrokerThing(thing.Thing):
                 'data': self.last_data,
                 'ts': self.last_data_ts,
                 'ns': self.ns,
+                'documentation_url': self.documentation_url
             }
 
     @property

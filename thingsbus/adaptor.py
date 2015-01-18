@@ -8,7 +8,7 @@ import thing
 
 class Adaptor(threading.Thread):
 
-    def __init__(self, ns, broker_input_url=None, zone=None):
+    def __init__(self, ns, documentation_url, broker_input_url=None, zone=None):
 
         if (zone is None) and (broker_input_url is None):
             raise RuntimeError('Must supply zone or broker_input_url')
@@ -20,6 +20,8 @@ class Adaptor(threading.Thread):
 
         self.ns = ns
         self.ns_parts = thing.parse_ns(ns)
+        self.documentation_url = documentation_url
+
         self.ok = True
         self.msg_q = Queue.Queue()
 
@@ -69,6 +71,7 @@ class Adaptor(threading.Thread):
         msg = {
             'type': 'thing_update',
             'ns': final_ns,
+            'documentation_url': self.documentation_url,
             'data': data,
             'ts': ts
         }
