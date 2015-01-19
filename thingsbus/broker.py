@@ -2,6 +2,8 @@ import optparse
 from thingsbus import thing
 from zmqfan import zmqsub
 import time
+import socket
+import msgpack
 
 """
 General process for the broker: given the set of things you have, it will keep the latest data for each item, send snapshots on a regular pattern, etc - it also does fan-out, passing information to however many subscribers there are.
@@ -47,16 +49,43 @@ class Broker(object):
         self.ok = False
 
     def run(self):
-        self.directory_out = zmqsub.BindPub('tcp://*:%d' % DIRECTORY_PORT)
+        # ZMQ+tcp+json input - SUB
         self.adaptors_in = zmqsub.BindSub('tcp://*:%d' % INPUT_PORT)
+        # UDP+msgpack input
+        self.udpsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.udpsock.bind(('0.0.0.0', INPUT_PORT))
+        # TODO on end, unbind that..
+
+        self.directory_out = zmqsub.BindPub('tcp://*:%d' % DIRECTORY_PORT)
         self.sent_directory = time.time() - DIRECTORY_INTERVAL
         while self.ok:
             try:
-                msg = self.adaptors_in.recv(timeout=BLOCK_TIME)
+                r, _w, _x = zmqsub.select([self.udpsock, self.adaptors_in], [], [], BLOCK_TIME)
 
-                output_event = self.directory.handle_message(msg)
-                if output_event:
-                    self.directory_out.send(output_event)
+                msgs = []
+
+                for sock in r:
+                    if sock is self.adaptors_in:
+                        msgs.append(self.adaptors_in.recv(timeout=BLOCK_TIME))
+                        if self.verbose:
+                            print 'recvd zmq adaptor data.'
+                    elif sock is self.udpsock:
+                        data, addr = self.udpsock.recvfrom(4096)
+                        if self.verbose:
+                            print 'recvd udp adaptor data'
+
+                        try:
+                            msgs.append(msgpack.loads(data))
+                        except :
+                            # TODO handle error better....
+                            if self.verbose:
+                                print 'failed to unpack msgpack udp packet, skipping'
+                for msg in msgs:
+                    output_event = self.directory.handle_message(msg)
+                    if output_event:
+                        self.directory_out.send(output_event)
+                        if self.verbose:
+                            print 'sent event update for %s.' % output_event['ns']
             except thing.BadMessageException:
                 if self.verbose:
                     print 'recvd bad zeromq message, skipped.'

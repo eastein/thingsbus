@@ -18,6 +18,14 @@ Based on ZeroMQ, Things Bus has 3 main parts:
 
 Both `thingsbus.adaptor.Adaptor` and `thingsbus.client.Client` take the keyword argument `zone`; the SRV record `_thingsbus._tcp` is used to determine the main port & the hostname of the broker server. If this is not desired, then the `broker_url` parameter of `Client` and the `broker_input_url` of `Adaptor` are available for use. It's advised to use an SRV record, for simplicity and for reducing the need for passing additional configuration around to all of the things at the edges of your Thingsbus setup.
 
+### Network Protocol: ZeroMQ TCP + JSON
+
+The Client side protocol and the Adaptor side protocol both support this protocol. The messages are always dictionaries at the top level. The body of the messages contains nothing except uncompressed JSON.
+
+### Network Protocol: UDP + Messagepack
+
+The Adaptor side protocol supports an additional network protocol, encoding the messages in messagepack instead of JSON and sending them as the entire body of UDP datagrams.
+
 # Examples
 
 ## Connect to the broker and get data for a Thing

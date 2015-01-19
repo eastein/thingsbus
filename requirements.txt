@@ -1,3 +1,4 @@
 dnspython
-zmqfan>=0.6
+zmqfan>=0.7
 nose
+msgpack-python
