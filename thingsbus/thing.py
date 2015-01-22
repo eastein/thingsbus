@@ -134,7 +134,11 @@ class Directory(object):
 
         # TODO validate ns, ts - data really can be anything.
         ns = msg['ns']
-        ts = msg.get('ts', time.time())
+        ts = msg.get('ts', None)
+        if ts is None:
+            ts = time.time()
+        elif not isinstance(ts, float):
+            raise BadMessageException("ts was not None or float in input.")
         documentation_url = msg.get('documentation_url')
         data = msg['data']
 
@@ -152,9 +156,26 @@ class Directory(object):
             'documentation_url': documentation_url
         }
 
-    def handle_message(self, msg, accept_snapshots=False):
+    def handle_message(self, msg, accept_snapshots=False, accept_listmsg=False):
+        if not accept_snapshots:
+            if accept_listmsg:
+                if type(msg) == list:
+                    if len(msg) != 4:
+                        raise BadMessageException("List typed messages must be of length 4.")
+
+                    # accepting no snapshots + accepting list messages means we are accepting smaller,
+                    # simpler-encoding lists [ns, ts, data, documentation_url] where ts MAY be
+                    # null and documentation_url SHOULD not be null
+                    msg = {
+                        'ns': msg[0],
+                        'ts': msg[1],
+                        'data': msg[2],
+                        'documentation_url': msg[3],
+                        'type': 'thing_update'
+                    }
+
         if type(msg) != dict:
-            raise BadmessageException("Dictionaries are the only valid top level message.")
+            raise BadMessageException("Dictionaries are the only valid top level message.")
 
         if 'type' not in msg:
             raise BadMessageException("Messages must be typed.")
@@ -177,4 +198,4 @@ class Directory(object):
                     except BadNamespaceException:
                         pass  # TODO handle debug printing this
         else:
-            raise BadmessageException("Don't know how to handle message of type %s" % msg['type'])
+            raise BadMessageException("Don't know how to handle message of type %s" % msg['type'])

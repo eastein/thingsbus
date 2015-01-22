@@ -59,38 +59,38 @@ class Broker(object):
         self.directory_out = zmqsub.BindPub('tcp://*:%d' % DIRECTORY_PORT)
         self.sent_directory = time.time() - DIRECTORY_INTERVAL
         while self.ok:
-            try:
-                r, _w, _x = zmqsub.select([self.udpsock, self.adaptors_in], [], [], BLOCK_TIME)
+            r, _w, _x = zmqsub.select([self.udpsock, self.adaptors_in], [], [], BLOCK_TIME)
 
-                msgs = []
+            msgs = []
 
-                for sock in r:
-                    if sock is self.adaptors_in:
-                        msgs.append(self.adaptors_in.recv(timeout=BLOCK_TIME))
+            # TODO handle the situation where fairness between the 2 methods of input can be too much,
+            # resulting in one of the inputs being starved for consumption
+            for sock in r:
+                if sock is self.adaptors_in:
+                    msgs.append(self.adaptors_in.recv(timeout=BLOCK_TIME))
+                    if self.verbose:
+                        print 'recvd zmq adaptor data.'
+                elif sock is self.udpsock:
+                    data, addr = self.udpsock.recvfrom(4096)
+                    if self.verbose:
+                        print 'recvd udp adaptor data'
+
+                    try:
+                        msgs.append(msgpack.loads(data))
+                    except:
+                        # TODO handle error better....
                         if self.verbose:
-                            print 'recvd zmq adaptor data.'
-                    elif sock is self.udpsock:
-                        data, addr = self.udpsock.recvfrom(4096)
-                        if self.verbose:
-                            print 'recvd udp adaptor data'
-
-                        try:
-                            msgs.append(msgpack.loads(data))
-                        except :
-                            # TODO handle error better....
-                            if self.verbose:
-                                print 'failed to unpack msgpack udp packet, skipping'
-                for msg in msgs:
-                    output_event = self.directory.handle_message(msg)
+                            print 'failed to unpack msgpack udp packet, skipping'
+            for msg in msgs:
+                try:
+                    output_event = self.directory.handle_message(msg, accept_listmsg=True)
                     if output_event:
                         self.directory_out.send(output_event)
                         if self.verbose:
                             print 'sent event update for %s.' % output_event['ns']
-            except thing.BadMessageException:
-                if self.verbose:
-                    print 'recvd bad zeromq message, skipped.'
-            except zmqsub.NoMessagesException:
-                pass  # it's ok to not receive anything (for christmas, or on sockets)
+                except thing.BadMessageException, bme:
+                    if self.verbose:
+                        print 'recvd bad message, skipped: %s' % str(bme)
 
             now = time.time()
             if now > self.sent_directory + DIRECTORY_INTERVAL:
