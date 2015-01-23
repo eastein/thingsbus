@@ -27,8 +27,10 @@ if len(sys.argv) > 1:
     if sys.argv[1] == 'list':
         msg = msg_list
 
-
 MESSAGE = msgpack.dumps(msg)
+
+if sys.argv[-1] == '-v':
+    print 'sending msg (repr\'d): %s' % repr(MESSAGE)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
