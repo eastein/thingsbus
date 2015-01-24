@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='thingsbus',
-      version='0.0.2c1',
+      version='0.1.0',
       description='Thingsbus data broker, input, output, and dispatch.',
       author='Eric Stein',
       author_email='toba@des.truct.org',
