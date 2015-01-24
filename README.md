@@ -38,11 +38,13 @@ The Adaptor side protocol supports an additional network protocol, encoding the 
 <A name="toc2-37" title="Connect to the broker and get data for a Thing" />
 ## Connect to the broker and get data for a Thing
 
+~~~python
     >>> import thingsbus.client
     >>> cl = thingsbus.client.Client(zone='pumpingstationone.org')
     >>> elec = cl.directory.get_thing('spacemon.electronics')
     >>> elec.get_data()
     (1.2385549545288086, {u'ratio_busy': 0.03262867647058824, u'luminance': 106.09383138020833})
+~~~
 
 The last call to `get_data` will return a tuple of float seconds (age of the data) and the data for the directory - if there is any data. If not, None will be returned.
 
@@ -56,9 +58,11 @@ The last call to `get_data` will return a tuple of float seconds (age of the dat
 <A name="toc2-55" title="Use the adaptor module" />
 ## Use the adaptor module
 
+~~~python
     import thingsbus.adaptor
     adapt = thingsbus.adaptor.Adaptor('shop.shopbot', 'http://example.com/Shopbot_Thingsbus_Documentation', broker_input_url='tcp://*:7955')
     adapt.send({'busy': 12.0, 'light': 31.8}, ns='spacemon')
+~~~
 
 This sets up an adaptor that lets you send data under the `shop.shopbot` namespace, and then demonstrates sending data for the Thing `shop.shopbot.spacemon` that includes a busy percentage and a light percentage. If ts was supplied (float epoch) to the call to `send`, it would be passed through.
 
