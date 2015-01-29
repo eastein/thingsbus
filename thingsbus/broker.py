@@ -81,6 +81,7 @@ class Broker(object):
                         # TODO handle error better....
                         if self.verbose:
                             print 'failed to unpack msgpack udp packet, skipping'
+                            print 'data: %s' % repr(data)
             for msg in msgs:
                 try:
                     output_event = self.directory.handle_message(msg, accept_listmsg=True)
@@ -90,7 +91,7 @@ class Broker(object):
                             print 'sent event update for %s.' % output_event['ns']
                 except thing.BadMessageException, bme:
                     if self.verbose:
-                        print 'recvd bad message, skipped: %s' % str(bme)
+                        print 'recvd bad message, skipped reason: %s' % str(bme)
 
             now = time.time()
             if now > self.sent_directory + DIRECTORY_INTERVAL:
