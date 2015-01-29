@@ -134,6 +134,8 @@ class Directory(object):
 
         # TODO validate ns, ts - data really can be anything.
         ns = msg['ns']
+        if ns is None :
+            raise BadMessageException("ns was None.")
         ts = msg.get('ts', None)
         if ts is None:
             ts = time.time()
