@@ -8,10 +8,9 @@
 
 Based on ZeroMQ, Things Bus has 3 main parts:
 
-* Pollers/Adaptors - bridges that are aware of both the thing they are tapping into, and Things Bus, so that the individual data sources don't have to be Things Bus aware. The `thingsbus.adaptor` python module supplies an `Adaptor` class which can be used to implement an Adaptor, either as a separate system from the data source, or within it.
+* Pollers/Adaptors - bridges that are aware of both the thing they are tapping into, and Things Bus, so that the individual data sources don't have to be Things Bus aware. The `thingsbus.adaptor` python module supplies an `Adaptor` class which can be used to implement an Adaptor, either as a separate system from the data source, or within it. The Adaptor class uses ZeroMQ to send the updates. Additionally, there is a mode available that sends Messagepack formatted updates via UDP.
 * Broker/Directory - Server system that looks at the information gathered by the pollers/adaptos, provides a point from which to receive it using one protocol, and generates a directory of the Things
-* Consumers/Clients - Programs that are aware of Things Bus and may use helper libraries supplied by Things Bus, but aren't aware of the implementation details of the Things.
-
+* Consumers/Clients - Programs that are aware of Things Bus and may use helper libraries supplied by Things Bus, but aren't aware of the implementation details of the Things.  The Clients receive the updates and snapshots over ZeroMQ.
 ## Implementation Details
 
 ### Service Discovery
@@ -37,6 +36,13 @@ The Adaptor side protocol supports an additional network protocol, encoding the 
     (1.2385549545288086, {u'ratio_busy': 0.03262867647058824, u'luminance': 106.09383138020833})
 
 The last call to `get_data` will return a tuple of float seconds (age of the data) and the data for the directory - if there is any data. If not, None will be returned.
+
+## Print all events from the broker
+
+    (thingsbus)eastein@talisker ~/git/thingsbus :) $ PYTHONPATH=`pwd` python examples/print_all_events.py -z pumpingstationone.org
+    ThingEvent<Thing<spacemon.electronics>, ts=1423351104.945, flags=, data={u'ratio_busy': 0.14315257352941177, u'luminance': 114.361669921875}>
+    ThingEvent<Thing<bottlekid.prototype>, ts=1423351105.715, flags=, data={u'dht22_error': u'bad checksum, DHT22 data: 75:55:77:d5:d5\r\n', u'metadata': {u'loops': 454, u'msgs_dropped': 0, u'msgs_sent': 454}}>
+
 
 
 ## Run the broker
