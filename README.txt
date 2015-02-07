@@ -39,7 +39,7 @@ The last call to `get_data` will return a tuple of float seconds (age of the dat
 
 ## Print all events from the broker
 
-    (thingsbus)eastein@talisker ~/git/thingsbus :) $ PYTHONPATH=`pwd` python examples/print_all_events.py -z pumpingstationone.org
+    (thingsbus)eastein@talisker ~/git/thingsbus :) $ PYTHONPATH=`pwd` python examples/print_all_events.py -u tcp://127.0.0.1:7954
     ThingEvent<Thing<spacemon.electronics>, ts=1423351104.945, flags=, data={u'ratio_busy': 0.14315257352941177, u'luminance': 114.361669921875}>
     ThingEvent<Thing<bottlekid.prototype>, ts=1423351105.715, flags=, data={u'dht22_error': u'bad checksum, DHT22 data: 75:55:77:d5:d5\r\n', u'metadata': {u'loops': 454, u'msgs_dropped': 0, u'msgs_sent': 454}}>
 
