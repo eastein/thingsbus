@@ -4,17 +4,18 @@ import threading
 import Queue
 import time
 import thing
-
+import pprint
 
 class Adaptor(threading.Thread):
 
-    def __init__(self, ns, documentation_url, broker_input_url=None, zone=None):
+    def __init__(self, ns, documentation_url, broker_input_url=None, zone=None, verbose=False):
 
         if (zone is None) and (broker_input_url is None):
             raise RuntimeError('Must supply zone or broker_input_url')
         if not ns:
             raise RuntimeError('ns must be set.')
 
+        self.verbose = verbose
         self.zone = zone
         self._broker_input_url = broker_input_url
 
@@ -50,12 +51,18 @@ class Adaptor(threading.Thread):
 
     def run(self):
         url = self.broker_input_url
+        if self.verbose:
+            print '%s connecting to %s' % (self, url)
         self.broker_input = zmqsub.ConnectPub(url)
 
         while self.ok:
             try:
                 # TODO use polling instead of assuming we can send
-                self.broker_input.send(self.msg_q.get(timeout=0.05))
+                msg_tosend = self.msg_q.get(timeout=0.05)
+                if self.verbose:
+                    print '%s sending message...' % self
+                    pprint.pprint(msg_tosend)
+                self.broker_input.send(msg_tosend)
             except Queue.Empty:
                 pass
 
