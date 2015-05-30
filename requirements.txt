@@ -1,3 +1,4 @@
+six
 dnspython
 zmqfan>=0.7
 nose
