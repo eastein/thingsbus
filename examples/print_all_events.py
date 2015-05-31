@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 #!usr/bin/env python
 
 import optparse
@@ -19,7 +21,7 @@ if __name__ == '__main__':
     client = thingsbus.client.Client(broker_url=opts.thingsbus_broker_url, zone=opts.thingsbus_zone)
 
     def print_e(e):
-        print e
+        print(e)
 
     if opts.ns:
         thing = client.directory.get_thing(opts.ns)
