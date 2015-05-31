@@ -1,8 +1,10 @@
+from __future__ import absolute_import
 import time
 import threading
 import copy
 import pprint
 import re
+import six
 
 
 class InternalException(Exception):
@@ -125,7 +127,7 @@ class Directory(object):
 
     @property
     def all_things(self):
-        return self._name_to_thing.values()
+        return list(self._name_to_thing.values())
 
     def handle_data_set(self, msg, from_snapshot=False):
         for k in ['ns', 'data']:
@@ -134,7 +136,7 @@ class Directory(object):
 
         # TODO validate ns, ts - data really can be anything.
         ns = msg['ns']
-        if not isinstance(ns, basestring) :
+        if not isinstance(ns, six.string_types) :
             raise BadMessageException("ns was %s." % type(ns))
         ts = msg.get('ts', None)
         if ts is None:
@@ -194,7 +196,7 @@ class Directory(object):
                 if type(msg['data']) != dict:
                     raise BadMessageException("Snapshot data must be a dictionary.")
 
-                for data_value in msg['data'].values():
+                for data_value in list(msg['data'].values()):
                     try:
                         self.handle_data_set(data_value, from_snapshot=True)
                     except BadNamespaceException:
