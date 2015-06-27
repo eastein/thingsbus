@@ -1,9 +1,11 @@
+from __future__ import absolute_import
+from __future__ import print_function
 import thingsbus.service_discovery as sd
 from zmqfan import zmqsub
 import threading
-import Queue
+import six.moves.queue
 import time
-import thing
+from . import thing
 import pprint
 
 class Adaptor(threading.Thread):
@@ -24,7 +26,7 @@ class Adaptor(threading.Thread):
         self.documentation_url = documentation_url
 
         self.ok = True
-        self.msg_q = Queue.Queue()
+        self.msg_q = six.moves.queue.Queue()
 
         threading.Thread.__init__(self)
         self.daemon = True
@@ -52,7 +54,7 @@ class Adaptor(threading.Thread):
     def run(self):
         url = self.broker_input_url
         if self.verbose:
-            print '%s connecting to %s' % (self, url)
+            print('%s connecting to %s' % (self, url))
         self.broker_input = zmqsub.ConnectPub(url)
 
         while self.ok:
@@ -60,10 +62,10 @@ class Adaptor(threading.Thread):
                 # TODO use polling instead of assuming we can send
                 msg_tosend = self.msg_q.get(timeout=0.05)
                 if self.verbose:
-                    print '%s sending message...' % self
+                    print('%s sending message...' % self)
                     pprint.pprint(msg_tosend)
                 self.broker_input.send(msg_tosend)
-            except Queue.Empty:
+            except six.moves.queue.Empty:
                 pass
 
     def send(self, data, ns=None, ts=None):

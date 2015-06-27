@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 import optparse
 from thingsbus import thing
 from zmqfan import zmqsub
@@ -70,19 +72,19 @@ class Broker(object):
                 if sock is self.adaptors_in:
                     msgs.append(self.adaptors_in.recv(timeout=BLOCK_TIME))
                     if self.verbose:
-                        print 'recvd zmq adaptor data.'
+                        print('recvd zmq adaptor data.')
                 elif sock is self.udpsock:
                     data, addr = self.udpsock.recvfrom(4096)
                     if self.verbose:
-                        print 'recvd udp adaptor data'
+                        print('recvd udp adaptor data')
 
                     try:
                         msgs.append(msgpack.loads(data))
                     except:
                         # TODO handle error better....
                         if self.verbose:
-                            print 'failed to unpack msgpack udp packet, skipping'
-                            print 'data: %s' % repr(data)
+                            print('failed to unpack msgpack udp packet, skipping')
+                            print('data: %s' % repr(data))
             for msg in msgs:
                 try:
                     output_event = self.directory.handle_message(msg, accept_listmsg=True, verbose=self.verbose)
@@ -91,10 +93,10 @@ class Broker(object):
                             pprint.pprint(output_event)
                         self.directory_out.send(output_event)
                         if self.verbose:
-                            print 'sent event update for %s.' % output_event['ns']
-                except thing.BadMessageException, bme:
+                            print('sent event update for %s.' % output_event['ns'])
+                except thing.BadMessageException as bme:
                     if self.verbose:
-                        print 'recvd bad message, skipped reason: %s' % str(bme)
+                        print('recvd bad message, skipped reason: %s' % str(bme))
 
             now = time.time()
             if now > self.sent_directory + DIRECTORY_INTERVAL:
@@ -114,7 +116,7 @@ class Broker(object):
                 }
                 self.directory_out.send(snapshot_msg)
                 if self.verbose:
-                    print 'sent snapshot of %d things.' % len(snapshot_msg['data'])
+                    print('sent snapshot of %d things.' % len(snapshot_msg['data']))
                 self.sent_directory = now
 
 if __name__ == '__main__':

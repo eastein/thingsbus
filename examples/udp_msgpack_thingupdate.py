@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 import time
 import socket
 import msgpack
@@ -30,7 +32,7 @@ if len(sys.argv) > 1:
 MESSAGE = msgpack.dumps(msg)
 
 if sys.argv[-1] == '-v':
-    print 'sending msg (repr\'d): %s' % repr(MESSAGE)
+    print('sending msg (repr\'d): %s' % repr(MESSAGE))
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
