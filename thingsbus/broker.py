@@ -4,6 +4,7 @@ from zmqfan import zmqsub
 import time
 import socket
 import msgpack
+import pprint
 
 """
 General process for the broker: given the set of things you have, it will keep the latest data for each item, send snapshots on a regular pattern, etc - it also does fan-out, passing information to however many subscribers there are.
@@ -84,8 +85,10 @@ class Broker(object):
                             print 'data: %s' % repr(data)
             for msg in msgs:
                 try:
-                    output_event = self.directory.handle_message(msg, accept_listmsg=True)
+                    output_event = self.directory.handle_message(msg, accept_listmsg=True, verbose=self.verbose)
                     if output_event:
+                        if self.verbose:
+                            pprint.pprint(output_event)
                         self.directory_out.send(output_event)
                         if self.verbose:
                             print 'sent event update for %s.' % output_event['ns']

@@ -127,12 +127,11 @@ class Directory(object):
     def all_things(self):
         return self._name_to_thing.values()
 
-    def handle_data_set(self, msg, from_snapshot=False):
+    def handle_data_set(self, msg, from_snapshot=False, verbose=False):
         for k in ['ns', 'data']:
             if k not in msg:
                 raise BadMessageException("%s not in message." % k)
 
-        # TODO validate ns, ts - data really can be anything.
         ns = msg['ns']
         if not isinstance(ns, basestring) :
             raise BadMessageException("ns was %s." % type(ns))
@@ -158,7 +157,7 @@ class Directory(object):
             'documentation_url': documentation_url
         }
 
-    def handle_message(self, msg, accept_snapshots=False, accept_listmsg=False):
+    def handle_message(self, msg, accept_snapshots=False, accept_listmsg=False, verbose=False):
         if not accept_snapshots:
             if accept_listmsg:
                 if type(msg) == list:
@@ -184,9 +183,10 @@ class Directory(object):
 
         if msg['type'] == 'thing_update':
             try:
-                return self.handle_data_set(msg)
+                return self.handle_data_set(msg, verbose=verbose)
             except BadNamespaceException:
-                pass  # TODO handle debug printing this
+                if verbose:
+                    print 'bad namespace for message %s' % str(msg)
         elif msg['type'] == 'thing_snapshot':
             if accept_snapshots:
                 if 'data' not in msg:
@@ -198,6 +198,7 @@ class Directory(object):
                     try:
                         self.handle_data_set(data_value, from_snapshot=True)
                     except BadNamespaceException:
-                        pass  # TODO handle debug printing this
+                        if verbose:
+                            print 'bad namespace for message %s' % str(msg)
         else:
             raise BadMessageException("Don't know how to handle message of type %s" % msg['type'])
