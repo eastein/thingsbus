@@ -21,6 +21,19 @@ Both `thingsbus.adaptor.Adaptor` and `thingsbus.client.Client` take the keyword 
 
 The Client side protocol and the Adaptor side protocol both support this protocol. The messages are always dictionaries at the top level. The body of the messages contains nothing except uncompressed JSON.
 
+There are 2 message types as of this writing.
+
+#### Thing Update Message
+
+	{
+		'type': 'thing_update',
+		'ns': dot separated namespace, string,
+		'data': [arbitrary data here],
+		'ts': float seconds since 1970 UTC,
+		'documentation_url': arbitrary string, but should be a URL documenting the format and semantics of 'data'
+	}
+
+
 ### Network Protocol: UDP + Messagepack
 
 The Adaptor side protocol supports an additional network protocol, encoding the messages in messagepack instead of JSON and sending them as the entire body of UDP datagrams.

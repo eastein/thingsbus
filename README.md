@@ -26,15 +26,29 @@ Both `thingsbus.adaptor.Adaptor` and `thingsbus.client.Client` take the keyword 
 
 The Client side protocol and the Adaptor side protocol both support this protocol. The messages are always dictionaries at the top level. The body of the messages contains nothing except uncompressed JSON.
 
-<A name="toc3-28" title="Network Protocol: UDP + Messagepack" />
+There are 2 message types as of this writing.
+
+<A name="toc4-30" title="Thing Update Message" />
+#### Thing Update Message
+
+	{
+		'type': 'thing_update',
+		'ns': dot separated namespace, string,
+		'data': [arbitrary data here],
+		'ts': float seconds since 1970 UTC,
+		'documentation_url': arbitrary string, but should be a URL documenting the format and semantics of 'data'
+	}
+
+
+<A name="toc3-42" title="Network Protocol: UDP + Messagepack" />
 ### Network Protocol: UDP + Messagepack
 
 The Adaptor side protocol supports an additional network protocol, encoding the messages in messagepack instead of JSON and sending them as the entire body of UDP datagrams.
 
-<A name="toc1-33" title="Examples" />
+<A name="toc1-47" title="Examples" />
 # Examples
 
-<A name="toc2-36" title="Connect to the broker and get data for a Thing" />
+<A name="toc2-50" title="Connect to the broker and get data for a Thing" />
 ## Connect to the broker and get data for a Thing
 
     >>> import thingsbus.client
@@ -45,7 +59,7 @@ The Adaptor side protocol supports an additional network protocol, encoding the 
 
 The last call to `get_data` will return a tuple of float seconds (age of the data) and the data for the directory - if there is any data. If not, None will be returned.
 
-<A name="toc2-47" title="Print all events from the broker" />
+<A name="toc2-61" title="Print all events from the broker" />
 ## Print all events from the broker
 
     (thingsbus)eastein@talisker ~/git/thingsbus :) $ PYTHONPATH=`pwd` python examples/print_all_events.py -u tcp://127.0.0.1:7954
@@ -54,13 +68,13 @@ The last call to `get_data` will return a tuple of float seconds (age of the dat
 
 
 
-<A name="toc2-56" title="Run the broker" />
+<A name="toc2-70" title="Run the broker" />
 ## Run the broker
 
     python -m thingsbus.broker
 
 
-<A name="toc2-62" title="Use the adaptor module" />
+<A name="toc2-76" title="Use the adaptor module" />
 ## Use the adaptor module
 
     import thingsbus.adaptor
@@ -69,7 +83,7 @@ The last call to `get_data` will return a tuple of float seconds (age of the dat
 
 This sets up an adaptor that lets you send data under the `shop.shopbot` namespace, and then demonstrates sending data for the Thing `shop.shopbot.spacemon` that includes a busy percentage and a light percentage. If ts was supplied (float epoch) to the call to `send`, it would be passed through.
 
-<A name="toc2-71" title="Adapt lidless at PS1 to a broker" />
+<A name="toc2-85" title="Adapt lidless at PS1 to a broker" />
 ## Adapt lidless at PS1 to a broker
 
     python -m thingsbus.generic_zmq_adaptor --ns spacemon --nskey camname --tskey frame_time --filter mtype:percept_update --projections luminance,ratio_busy --url 'tcp://*:7955' -s tcp://bellamy.ps1:7202,tcp://bellamy.ps1:7200,tcp://bellamy.ps1:7201,tcp://bellamy.ps1:7206 --documentation "https://wiki.pumpingstationone.org/Spacemon#Things_Bus"
