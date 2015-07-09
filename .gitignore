@@ -1,3 +1,7 @@
+MANIFEST
+.coverage
+dist/
+
 *~
 *.pyc
 *.py~

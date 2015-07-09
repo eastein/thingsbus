@@ -188,7 +188,7 @@ class Directory(object):
                 return self.handle_data_set(msg, verbose=verbose)
             except BadNamespaceException:
                 if verbose:
-                    print 'bad namespace for message %s' % str(msg)
+                    print('bad namespace for message %s' % str(msg))
         elif msg['type'] == 'thing_snapshot':
             if accept_snapshots:
                 if 'data' not in msg:
@@ -201,6 +201,6 @@ class Directory(object):
                         self.handle_data_set(data_value, from_snapshot=True)
                     except BadNamespaceException:
                         if verbose:
-                            print 'bad namespace for message %s' % str(msg)
+                            print('bad namespace for message %s' % str(msg))
         else:
             raise BadMessageException("Don't know how to handle message of type %s" % msg['type'])
