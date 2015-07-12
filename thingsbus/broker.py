@@ -90,14 +90,20 @@ class Broker(object):
                     data, addr = self.udpsock.recvfrom(4096)
                     if self.verbose:
                         print('recvd udp adaptor data')
+                    if data is None:
+                        continue
 
                     try:
-                        msgs.append(msgpack.loads(data))
+                        unpacker = msgpack.Unpacker(encoding='utf-8')
+                        unpacker.feed(data)
+                        msgs.append(unpacker.unpack())
+                    except UnicodeDecodeError:
+                        if self.verbose:
+                            print('failed to unpack msgpack udp packet, malformed utf8. skipping data: %s' % repr(data))
                     except:
                         # TODO handle error better....
                         if self.verbose:
-                            print('failed to unpack msgpack udp packet, skipping')
-                            print('data: %s' % repr(data))
+                            print('failed to unpack msgpack udp packet, skipping data: %s' % repr(data))
             for msg in msgs:
                 try:
                     output_event = self.directory.handle_message(msg, accept_listmsg=True)
