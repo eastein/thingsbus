@@ -9,7 +9,7 @@ DNSPYTHON_PACKAGE = {
 }[sys.version_info[0] == 2]
 
 setup(name='thingsbus',
-      version='0.2.0',
+      version='0.2.1',
       description='Thingsbus data broker, input, output, and dispatch.',
       author='Eric Stein',
       author_email='toba@des.truct.org',
