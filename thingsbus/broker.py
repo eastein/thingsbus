@@ -1,19 +1,26 @@
 from __future__ import absolute_import
 from __future__ import print_function
+
 import optparse
-from thingsbus import thing
-from zmqfan import zmqsub
 import time
 import socket
+
 import msgpack
+from zmqfan import zmqsub
+
+from thingsbus import thing
 
 """
-General process for the broker: given the set of things you have, it will keep the latest data for each item, send snapshots on a regular pattern, etc - it also does fan-out, passing information to however many subscribers there are.
+General process for the broker: given the set of things you have, it will keep the latest data
+for each item, send snapshots on a regular pattern, etc - it also does fan-out, passing information
+along to however many subscribers there are.
 """
 
 INPUT_PORT = 7955
 DIRECTORY_PORT = 7954
+
 # tune these TODO
+
 DIRECTORY_INTERVAL = 15
 DIRECTORY_EXPIRE = 60
 BLOCK_TIME = 0.05
@@ -42,23 +49,30 @@ class BrokerThing(thing.Thing):
 
 class Broker(object):
 
-    def __init__(self, verbose=False):
+    def __init__(self, verbose=False, adaptor_url=None, directory_url=None):
         self.directory = thing.Directory(thing_class=BrokerThing)
         self.ok = True
         self.verbose = verbose
+
+        if adaptor_url is None:
+            adaptor_url = 'tcp://*:%d' % INPUT_PORT
+        if directory_url is None:
+            directory_url = 'tcp://*:%d' % DIRECTORY_PORT
+        self.adaptor_url = adaptor_url
+        self.directory_url = directory_url
 
     def stop(self):
         self.ok = False
 
     def run(self):
         # ZMQ+tcp+json input - SUB
-        self.adaptors_in = zmqsub.BindSub('tcp://*:%d' % INPUT_PORT)
+        self.adaptors_in = zmqsub.BindSub(self.adaptor_url)
         # UDP+msgpack input
         self.udpsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.udpsock.bind(('0.0.0.0', INPUT_PORT))
         # TODO on end, unbind that..
 
-        self.directory_out = zmqsub.BindPub('tcp://*:%d' % DIRECTORY_PORT)
+        self.directory_out = zmqsub.BindPub(self.directory_url)
         self.sent_directory = time.time() - DIRECTORY_INTERVAL
         while self.ok:
             r, _w, _x = zmqsub.select([self.udpsock, self.adaptors_in], [], [], BLOCK_TIME)
