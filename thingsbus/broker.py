@@ -90,20 +90,13 @@ class Broker(object):
                     data, addr = self.udpsock.recvfrom(4096)
                     if self.verbose:
                         print('recvd udp adaptor data')
+                    
                     if data is None:
                         continue
 
-                    try:
-                        unpacker = msgpack.Unpacker(encoding='utf-8')
-                        unpacker.feed(data)
-                        msgs.append(unpacker.unpack())
-                    except UnicodeDecodeError:
-                        if self.verbose:
-                            print('failed to unpack msgpack udp packet, malformed utf8. skipping data: %s' % repr(data))
-                    except:
-                        # TODO handle error better....
-                        if self.verbose:
-                            print('failed to unpack msgpack udp packet, skipping data: %s' % repr(data))
+                    message = self.decode_mpack(data, verbose=self.verbose)
+                    if message is not None:
+                        msgs.append(message)
             for msg in msgs:
                 try:
                     output_event = self.directory.handle_message(msg, accept_listmsg=True)
@@ -135,6 +128,20 @@ class Broker(object):
                 if self.verbose:
                     print('sent snapshot of %d things.' % len(snapshot_msg['data']))
                 self.sent_directory = now
+
+    @classmethod
+    def decode_mpack(cls, data, verbose=False):
+        try:
+            unpacker = msgpack.Unpacker(encoding='utf-8')
+            unpacker.feed(data)
+            return unpacker.unpack()
+        except UnicodeDecodeError:
+            if verbose:
+                print('failed to unpack msgpack udp packet, malformed utf8. skipping data: %s' % repr(data))
+        except:
+            # TODO handle error better....
+            if verbose:
+                print('failed to unpack msgpack udp packet, skipping data: %s' % repr(data))
 
 if __name__ == '__main__':
     parser = optparse.OptionParser()
