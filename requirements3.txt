@@ -1,0 +1,5 @@
+six
+dnspython3
+zmqfan>=0.8
+nose
+msgpack-python
