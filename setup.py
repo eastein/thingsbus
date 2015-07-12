@@ -9,11 +9,11 @@ DNSPYTHON_PACKAGE = {
 }[sys.version_info[0] == 2]
 
 setup(name='thingsbus',
-      version='0.1.0',
+      version='0.2.0',
       description='Thingsbus data broker, input, output, and dispatch.',
       author='Eric Stein',
       author_email='toba@des.truct.org',
       url='https://github.com/eastein/thingsbus/',
       packages=['thingsbus'],
-      install_requires=[DNSPYTHON_PACKAGE, 'zmqfan>=0.7', 'msgpack-python', 'six']
+      install_requires=[DNSPYTHON_PACKAGE, 'zmqfan>=0.8', 'msgpack-python', 'six']
      )
