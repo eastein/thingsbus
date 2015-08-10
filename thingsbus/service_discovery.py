@@ -7,17 +7,22 @@ class ServiceFinder(object):
 
     @classmethod
     def broker_url(cls, domain):
-        return cls._get_broker_url(domain, 0)
+        return cls._get_broker_url(domain, 'tcp', 'thingsbus')
 
     @classmethod
-    def broker_input_url(cls, domain):
-        return cls._get_broker_url(domain, 1)
+    def broker_input_url(cls, domain, protocol='tcp'):
+        return cls._get_broker_url(domain, protocol, 'thingsbus_input')
 
     @classmethod
-    def _get_broker_url(cls, domain, port_offset):
-        a = cls.RESOLVER.query('_thingsbus._tcp.%s' % domain, 'SRV')
-        rr = a.rrset[0]
-
+    def _srv_query(cls, fqdn):
+        a = cls.RESOLVER.query(fqdn, 'SRV')
         # TODO actually do the priority and weight SRV record thing
+        use_rr = a.rrset[0]
+        return (use_rr.target.to_text(), use_rr.port)
 
-        return 'tcp://%s:%d' % (rr.target.to_text(), rr.port + port_offset)
+    @classmethod
+    def _get_broker_url(cls, domain, proto, service):
+        fqdn = '_%s._%s.%s' % (service, proto, domain)
+        host, port = cls._srv_query(fqdn)
+
+        return 'tcp://%s:%d' % (host, port)
