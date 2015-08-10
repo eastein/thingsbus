@@ -25,4 +25,4 @@ class ServiceFinder(object):
         fqdn = '_%s._%s.%s' % (service, proto, domain)
         host, port = cls._srv_query(fqdn)
 
-        return 'tcp://%s:%d' % (host, port)
+        return '%s://%s:%d' % (proto, host, port)
