@@ -70,7 +70,6 @@ class Broker(object):
         # UDP+msgpack input
         self.udpsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.udpsock.bind(('0.0.0.0', INPUT_PORT))
-        # TODO on end, unbind that..
 
         self.directory_out = zmqsub.BindPub(self.directory_url)
         self.sent_directory = time.time() - DIRECTORY_INTERVAL
@@ -128,6 +127,8 @@ class Broker(object):
                 if self.verbose:
                     print('sent snapshot of %d things.' % len(snapshot_msg['data']))
                 self.sent_directory = now
+
+        udpsock.close()
 
     @classmethod
     def decode_mpack(cls, data, verbose=False):
