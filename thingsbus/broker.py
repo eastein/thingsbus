@@ -68,13 +68,13 @@ class Broker(object):
         # ZMQ+tcp+json input - SUB
         self.adaptors_in = zmqsub.BindSub(self.adaptor_url)
         # UDP+msgpack input
-        self.udpsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.udpsock.bind(('0.0.0.0', INPUT_PORT))
+        self.adaptor_udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.adaptor_udp_socket.bind(('0.0.0.0', INPUT_PORT))
 
         self.directory_out = zmqsub.BindPub(self.directory_url)
         self.sent_directory = time.time() - DIRECTORY_INTERVAL
         while self.ok:
-            r, _w, _x = zmqsub.select([self.udpsock, self.adaptors_in], [], [], BLOCK_TIME)
+            r, _w, _x = zmqsub.select([self.adaptor_udp_socket, self.adaptors_in], [], [], BLOCK_TIME)
 
             msgs = []
 
@@ -85,11 +85,11 @@ class Broker(object):
                     msgs.append(self.adaptors_in.recv(timeout=BLOCK_TIME))
                     if self.verbose:
                         print('recvd zmq adaptor data.')
-                elif sock is self.udpsock:
-                    data, addr = self.udpsock.recvfrom(4096)
+                elif sock is self.adaptor_udp_socket:
+                    data, addr = self.adaptor_udp_socket.recvfrom(4096)
                     if self.verbose:
                         print('recvd udp adaptor data')
-                    
+
                     if data is None:
                         continue
 
@@ -128,7 +128,7 @@ class Broker(object):
                     print('sent snapshot of %d things.' % len(snapshot_msg['data']))
                 self.sent_directory = now
 
-        udpsock.close()
+        self.adaptor_udp_socket.close()
 
     @classmethod
     def decode_mpack(cls, data, verbose=False):
