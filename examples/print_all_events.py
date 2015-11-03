@@ -29,7 +29,7 @@ if __name__ == '__main__':
     else:
         thing = client.directory.root
 
-    thing.subscribe(print_e, thingsbus.client.F_TREE)
+    thing.subscribe(print_e, thingsbus.client.F_TREE | thingsbus.client.F_SNAPSHOT)
 
     while True:
         time.sleep(1)
