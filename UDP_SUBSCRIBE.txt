@@ -1,0 +1,49 @@
+# Protocol Design
+
+## Service Discovery
+
+Uses same SRV record lookups, using `_thingsbus._udp` SRV record of the specified zone to find the host/port to communicate to.
+
+## Subscription Management
+
+There are 4 message types: subscribe, subscribe acknowledge, subscription maintenance,  event.
+
+### Subscribe message type
+
+Data:
+
+* client side subscription id. Random integer decided by client.
+* Subscription Flags, bitfield.
+* Namespace to subscribe, string.
+* Metadata which must match on later maintenance messages:
+	* source IP
+	* source port
+
+Once the broker receives this, it should send a subscribe acknowledge.
+
+### Subscribe acknowledge message type
+
+Data:
+* client side subscription id. The same one sent from the client that this is an acknowledge of.
+* server side subscription id. This is the subscription on the server that the broker has assigned to the new subscription.
+* .. more?
+
+### Subscription maintenance message type
+
+An unsubscribe is presumed if no subscription maintenance message is received for 300 seconds.
+
+Data:
+* client side subscription id
+* broker side subscription id
+* TBD data type, operation field. Options: unsubscribe, renew.
+* Metadata which must match: source port, IP, and subscription IDs
+
+### Event message type
+
+Data:
+
+* client side & broker side subscription IDs
+* data - arbitrary
+* namespace - string
+* timestamp
+* event flags. snapshot or not.
