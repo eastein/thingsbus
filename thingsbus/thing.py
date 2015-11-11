@@ -90,6 +90,9 @@ class Thing(object):
             self.last_data_ts = ts
 
     def get_data(self):
+        """
+        If data exists, a tuple of how many seconds old the data is & the data is returned. Otherwise, return None.
+        """
         now = time.time()
         with self.data_lock:
             if self.last_data_ts is None:
