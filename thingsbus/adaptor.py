@@ -69,6 +69,17 @@ class Adaptor(threading.Thread):
                 pass
 
     def send(self, data, ns=None, ts=None):
+        """Send data to associate with the Thing that the Adaptor represents.
+
+        Args:
+          data: The data to send.
+          ns: (Default value = None) NS fragments that indicate a sub-thing rather than the Thing whose namespace the Adaptor is for.
+          ts: (Default value = None) floating point seconds since UTC unix epoch indicating the timestamp the data was accurate for.
+
+        Returns:
+          : None
+
+        """
         if ts is None:
             ts = time.time()
 

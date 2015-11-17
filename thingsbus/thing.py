@@ -43,13 +43,17 @@ def stringify_ns(nsl):
 
 class Thing(object):
 
-    """
-    HAS_EVENT_HOOK on a Thing class or a descendant of Thing indicates that _event_hook is defined and should be called
+    """HAS_EVENT_HOOK on a Thing class or a descendant of Thing indicates that _event_hook is defined and should be called
                    when a data update arrives for the Thing with these params:
-                   @param self - obvious
-                   @param is_new - boolean, whether the data is new, - false for snapshots 
-                   @param ts - float, unix epoch of the data's timestamp
-                   @param data - the data
+
+    Args:
+      self: obvious
+      is_new: boolean, whether the data is new, - false for snapshots
+      ts: float, unix epoch of the data's timestamp
+      data: the data
+
+    Returns:
+
     """
     HAS_EVENT_HOOK = False
 
@@ -77,8 +81,13 @@ class Thing(object):
         self.documentation_url = None
 
     def _register_child(self, child):
-        """
-        This call is for internal use; it tells a Thing that it has a child Thing.
+        """This call is for internal use; it tells a Thing that it has a child Thing.
+
+        Args:
+          child: 
+
+        Returns:
+
         """
         self.children.append(child)
 

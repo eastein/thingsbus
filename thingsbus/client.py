@@ -86,11 +86,16 @@ class Directory(thing.Directory):
 class Client(threading.Thread):
 
     def __init__(self, zone=None, broker_url=None, context=None):
-        """
-        @param context a zeromq context or zmqsub.JSONZMQ object to get context from; otherwise create a new one.
-        @param zone the zone to use SRV records to locate the broker for
-        @param broker_url the broker url to use, if you'd prefer not to use service discovery
-        """
+    """
+
+    Args:
+      context: a zeromq context or zmqsub.JSONZMQ object to get context from; otherwise create a new one.
+      zone: the zone to use SRV records to locate the broker for
+      broker_url: the broker url to use, if you'd prefer not to use service discovery
+
+    Returns:
+
+    """
         self.ok = True
         self.zone = zone
         self._broker_url = broker_url
