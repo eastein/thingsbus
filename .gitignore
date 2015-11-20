@@ -1,8 +1,12 @@
 venv2
 venv3
+
 .coverage
+
 MANIFEST
 dist/
+
+.idea
 *~
 *.pyc
 *.py~
